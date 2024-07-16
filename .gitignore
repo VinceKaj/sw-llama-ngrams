@@ -1,0 +1,8 @@
+llm-perplexities.txt
+adapters/
+training_checkpoints/
+Meta-Llama-3-8B-Instruct/
+data/
+scripts/__pycache__/
+.env
+.DS_Store
