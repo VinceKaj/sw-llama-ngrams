@@ -3,13 +3,17 @@ from transformers import (
   AutoModelForCausalLM,
 )
 from peft import PeftModel
-import accelerate
 from settings import Config
 import data
 from tqdm import tqdm
+import os
 
 def generate_from_prompt(gen_dir_name):
   global tokenizer, model
+
+  try:
+    os.mkdir(gen_dir_name)
+  except: pass
 
   prompt_dataset = data.get_dataset(Config.SW_NO_SPEAKER_DIR)["prompt"]
 
