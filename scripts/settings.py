@@ -16,9 +16,9 @@ class Config:
   SW_INSTRUCT_NO_SPEAKERS = f"{dir}/../data/sw-instruct-no-speakers/" # SW_NO_SPEAKER_DIR data formatted with a prompt and apply_chat_template
   
   # MODEL
-  MODEL_NAME_OR_DIR = "meta-llama/Meta-Llama-3-8B" # Llama-3-8B-Instruct
-  USE_SAFETENSORS = False # set to true if MODEL_NAME_OR_DIR is a local directory (safetensors are downloaded)
-  ADAPTERS_DIR = f"{dir}/../adapters/" # directory where trained model is stored and retrieved from
+  MODEL_NAME_OR_DIR = "/disk/data2/s2482679/models/Meta-Llama-3-8B-Instruct" # Llama-3-8B-Instruct
+  USE_SAFETENSORS = True # set to true if MODEL_NAME_OR_DIR is a local directory (safetensors are downloaded)
+  PROMPTS_DIR = f"{dir}/../soft-prompts/" # directory where trained model is stored and retrieved from
   MAX_LENGTH = 4096 # How many tokens to set each conversation to for training & perplexity evaluation
 
   # QUANTIZATION
@@ -35,9 +35,9 @@ class Config:
   # TRAINING
   DO_TRAINING = True # if False, skips the training stage.
   BATCH_SIZE = 2 # Training & evaluation batch size
-  EPOCHS = 1
-  RANK = 64
-  ALPHA = RANK*2
+  EPOCHS = 3
+  VIRTUAL_TOKENS = 16
+  PROMPT_TEXT = "Write a phone conversation between two people discussing a topic."
   DROPOUT = 0.1
   OPTIMIZER = "paged_adamw_32bit"
   TRAIN_DIR = f"{dir}/../training_checkpoints/"

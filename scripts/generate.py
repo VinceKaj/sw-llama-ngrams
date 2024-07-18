@@ -66,7 +66,7 @@ if (Config.GENERATE_USING_BASE):
   generate_from_prompt(Config.BASE_GENERATE_DIR)
 
 if (Config.GENERATE_USING_TUNED):
-  model = PeftModel.from_pretrained(model, Config.ADAPTERS_DIR)
+  model = PeftModel.from_pretrained(model, Config.PROMPTS_DIR)
   model = model.merge_and_unload()
 
   print("Generating with fine-tuned model...")

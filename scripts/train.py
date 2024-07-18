@@ -5,10 +5,11 @@ import torch
 from transformers import (
   AutoTokenizer,
   AutoModelForCausalLM,
-  DataCollatorForLanguageModeling
+  DataCollatorForLanguageModeling,
+  TrainingArguments,
+  Trainer
 )
-from trl import SFTTrainer, SFTConfig
-from peft import LoraConfig, get_peft_model
+from peft import PromptTuningConfig, get_peft_model, TaskType, PromptTuningInit
 
 if not Config.DO_TRAINING:
   print("Training is disabled.")
@@ -38,48 +39,38 @@ for param in model.parameters():
 model.gradient_checkpointing_enable()
 model.enable_input_require_grads()
 
-# Load adapters
-lora_config = LoraConfig(
-  r=Config.RANK,
-  lora_alpha=Config.ALPHA,
-  target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-  lora_dropout=Config.DROPOUT,
-  bias="none",
-  task_type="CAUSAL_LM"
+# Load soft prompts
+propmts_config = PromptTuningConfig(
+  task_type=TaskType.CAUSAL_LM,
+  prompt_tuning_init=PromptTuningInit.RANDOM,
+  num_virtual_tokens=Config.VIRTUAL_TOKENS,
+  prompt_tuning_init_text=Config.PROMPT_TEXT,
+  tokenizer_name_or_path=Config.MODEL_NAME_OR_DIR
 )
-model = get_peft_model(model, lora_config)
+model = get_peft_model(model, propmts_config)
 model.print_trainable_parameters()
 
 # Load data
 train_data, _, eval_data = data.get_tokenized_datasets(tokenizer, Config.SW_INSTRUCT_NO_SPEAKERS)
 
-# Training configs
-data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
+def create_training_arguments(path, learning_rate=0.0035, epochs=6):
+  return TrainingArguments(
+    output_dir=path,
+    auto_find_batch_size=True,
+    learning_rate=learning_rate,
+    num_train_epochs=epochs,
+  )
 
-training_args = SFTConfig(
-  output_dir=Config.TRAIN_DIR,
-  eval_strategy="epoch",
-  per_device_train_batch_size=Config.BATCH_SIZE,
-  per_device_eval_batch_size=Config.BATCH_SIZE,
-  num_train_epochs=Config.EPOCHS,
-  seed=Config.SEED,
-  gradient_accumulation_steps=1,
-  eval_accumulation_steps=1,
-  optim=Config.OPTIMIZER,
-  max_seq_length=Config.MAX_LENGTH,
-  report_to=Config.REPORT_TO,
-)
+def create_trainer(model, training_args, train_dataset):
+  return Trainer(
+    model=model,
+    args=training_args,
+    data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False), # mlm meas masked language modeling
+    train_dataset=train_dataset
+  )
 
-trainer = SFTTrainer(
-  model=model,
-  args=training_args,
-  data_collator=data_collator,
-  train_dataset=train_data,
-  eval_dataset=eval_data,
-  tokenizer=tokenizer,
-  packing=False
-)
-
-# TRAIN & SAVE
+training_args_prompt = create_training_arguments(Config.TRAIN_DIR, learning_rate=0.0035, epochs=Config.EPOCHS)
+trainer = create_trainer(model, training_args_prompt, train_data)
 trainer.train()
-trainer.save_model(Config.ADAPTERS_DIR)
+
+trainer.model.save_pretrained(Config.PROMPTS_DIR)
