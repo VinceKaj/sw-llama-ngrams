@@ -55,26 +55,37 @@ test_tokenized = tokenize_files(test_files)
 print("Extracting Llama vocabulary...")
 vocab = [tokenizer.convert_ids_to_tokens([val])[0] for [key,val] in tokenizer.get_vocab().items()]
 
-try:
-  os.mkdir(Config.NGRAM_DATA_DIR)
-except:
-  pass
+try: os.mkdir(Config.NGRAM_DATA_DIR)
+except: pass
+try: os.mkdir(Config.NGRAM_DATA_DIR + "train")
+except: pass
+
 
 print("Writing files...")
-with open(f"{Config.NGRAM_DATA_DIR}/base-gen-tokenized.text", "w") as f:
-  for conversation in base_gen_tokenized:
-    f.write(' '.join(conversation) + '\n')
-  
-with open(f"{Config.NGRAM_DATA_DIR}/trained-gen-tokenized.text", "w") as f:
-  for conversation in trained_gen_tokenized:
-    f.write(' '.join(conversation) + '\n')
 
-with open(f"{Config.NGRAM_DATA_DIR}/test-tokenized.text", "w") as f:
+for count in [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 975]:
+
+  with open(f"{Config.NGRAM_DATA_DIR}/train/base-gen-tokenized-{count}.text", "w") as f:
+    for conversation in base_gen_tokenized[:count]:
+      f.write(' '.join(conversation) + '\n')
+    
+  with open(f"{Config.NGRAM_DATA_DIR}/train/trained-gen-tokenized-{count}.text", "w") as f:
+    for conversation in trained_gen_tokenized[:count]:
+      f.write(' '.join(conversation) + '\n')
+
+  with open(f"{Config.NGRAM_DATA_DIR}/train/prompt-tokenized-{count}.text", "w") as f:
+    for conversation in prompt_tokenized[:count]:
+      f.write(' '.join(conversation) + '\n')
+
+# 90% of switchboard in a train dataset
+for count in [1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2194]:
+  with open(f"{Config.NGRAM_DATA_DIR}/train/prompt-tokenized-{count}.text", "w") as f:
+    for conversation in prompt_tokenized[:count]:
+      f.write(' '.join(conversation) + '\n')
+
+# test and vocab
+with open(f"{Config.NGRAM_DATA_DIR}/train/test-tokenized.text", "w") as f:
   for conversation in test_tokenized:
-    f.write(' '.join(conversation) + '\n')
-
-with open(f"{Config.NGRAM_DATA_DIR}/prompt-tokenized.text", "w") as f:
-  for conversation in prompt_tokenized:
     f.write(' '.join(conversation) + '\n')
 
 with open(f"{Config.NGRAM_DATA_DIR}/vocab.text", "w") as f:

@@ -1,12 +1,20 @@
+rm -r data/ngrams/models
+mkdir data/ngrams/models
+
+echo "n,dataset,conversations,perplexity" > ngram-perplexities.csv
+
 models=("prompt" "base-gen" "trained-gen")
+conversations=("50" "100" "200" "300" "400" "500" "600" "700" "800" "900" "975" "1000" "1100" "1200" "1300" "1400" "1500" "1600" "1700" "1800" "1900" "2000" "2100" "2194")
 n="7"
-for value in "${models[@]}"
+for count in "${conversations[@]}"
 do
-  # train
-  echo "Training & evaluting ngram token model with n = $n ($value dataset)"
-  cat data/ngrams/$value-tokenized.text | /disk/data2/s1569734/software/kaldi/tools/srilm/bin/i686-m64/ngram-count -kndiscount -interpolate -sort -text - -order $n -lm data/ngrams/token-model-$n-$value.lm
-  # evaluate perplexity
-  echo "Perplexity of ngram token model with n = $n ($value dataset):" >> llm-perplexities.txt
-  /disk/data2/s1569734/software/kaldi/tools/srilm/bin/i686-m64/ngram -lm data/ngrams/token-model-$n-$value.lm -order $n -ppl data/ngrams/test-tokenized.text \
-  | awk '/ppl= / {print $6}' >> llm-perplexities.txt
+  for value in "${models[@]}"
+  do
+    # train
+    echo "Training & evaluting ngram token model with n = $n ($value dataset) ($count conversations)"
+    cat data/ngrams/train/$value-tokenized-$count.text | /disk/data2/s1569734/software/kaldi/tools/srilm/bin/i686-m64/ngram-count -kndiscount -interpolate -sort -text - -order $n -lm data/ngrams/models/token-model-$n-$value-$count.lm
+    # evaluate perplexity
+    /disk/data2/s1569734/software/kaldi/tools/srilm/bin/i686-m64/ngram -lm data/ngrams/models/token-model-$n-$value-$count.lm -order $n -ppl data/ngrams/test-tokenized.text \
+    | echo $n,$value,$count,$(awk '/ppl= / {print $6}') >> ngram-perplexities.csv
+  done
 done

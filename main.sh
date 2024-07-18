@@ -18,7 +18,6 @@ echo "Perplextiy finished (see result above). Generating text for ngram training
 # generation
 python scripts/generate.py > llm-perplexities.txt
 echo "Generation done. Preparing data for ngram training."
-# prep data for ngram training
-python scripts/ngram-setup.py
 # train ngrams
+python scripts/ngram-setup.py
 ./ngrams.sh
