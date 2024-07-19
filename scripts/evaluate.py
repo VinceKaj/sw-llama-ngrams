@@ -69,7 +69,7 @@ if Config.EVAL_TUNED_MODEL:
 
     print("Loading soft prompts...")
     model = PeftModel.from_pretrained(model, Config.PROMPTS_DIR)
-    model = model.merge_and_unload()
+    #model = model.merge_and_unload()
 
     # Fine-tuned model evaluation
     print("Evaluating fine-tuned model...")
