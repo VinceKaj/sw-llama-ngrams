@@ -4,10 +4,6 @@ pip install transformers
 pip install peft accelerate datasets scikit-learn evaluate trl bitsandbytes accelerate tqdm
 conda install cuda -c nvidia -y
 pip install flash-attn --no-build-isolation
-# extracting data
-unzip data/sw-instruct-no-speakers.zip -d data
-unzip data/sw-no-speakers.zip -d data
-unzip data/sw-with-speakers.zip -d data
 # training
 echo "Training llama adapters"
 python scripts/train.py
