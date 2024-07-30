@@ -12,9 +12,9 @@ do
   do
     # train
     echo "Training & evaluting ngram token model with n = $n ($value dataset) ($count conversations)"
-    cat data/ngrams/train/$value-tokenized-$count.text | /disk/data2/s1569734/software/kaldi/tools/srilm/bin/i686-m64/ngram-count -kndiscount -interpolate -sort -text - -order $n -lm data/ngrams/models/token-model-$n-$value-$count.lm
+    cat data/ngrams/train/$value-tokenized-$count.text | ngram-count -kndiscount -interpolate -sort -text - -order $n -lm data/ngrams/models/token-model-$n-$value-$count.lm
     # evaluate perplexity
-    /disk/data2/s1569734/software/kaldi/tools/srilm/bin/i686-m64/ngram -lm data/ngrams/models/token-model-$n-$value-$count.lm -order $n -ppl data/ngrams/test-tokenized.text \
+    ngram -lm data/ngrams/models/token-model-$n-$value-$count.lm -order $n -ppl data/ngrams/test-tokenized.text \
     | echo $n,$value,$count,$(awk '/ppl= / {print $6}') >> ngram-perplexities.csv
   done
 done
